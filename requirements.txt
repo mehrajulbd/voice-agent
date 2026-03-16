@@ -1,0 +1,6 @@
+livekit
+livekit-api>=0.7.0
+python-dotenv
+requests
+numpy
+
