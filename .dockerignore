@@ -1,0 +1,51 @@
+# Git
+.git
+.gitignore
+.gitmodules
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+venv*/
+.idea/
+.vscode/
+
+# IDE
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Application specific
+*.log
+results/
+temp/
+.env
+.env.local
+.env.*.local
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+docker-compose.override.yml
+
+# Misc
+*.bak
+*.tmp

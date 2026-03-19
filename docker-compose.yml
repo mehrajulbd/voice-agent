@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  livekit-call:
+    build: .
+    container_name: livekit-call-app
+    ports:
+      - "8501:8501"
+    volumes:
+      # Mount .env file (do not commit actual .env with secrets)
+      - ./.env:/app/.env:ro
+      # Mount config directory for call configuration
+      - ./config:/app/config:ro
+      # Persist results
+      - ./results:/app/results
+    environment:
+      # You can override environment variables here if not using .env file
+      # - LIVEKIT_URL=${LIVEKIT_URL}
+      # - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      # - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+      # - SIP_TRUNK_ID=${SIP_TRUNK_ID}
+      # - FROM_PHONE_NUMBER=${FROM_PHONE_NUMBER}
+      # - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      # - TARGET_PHONE_NUMBER=${TARGET_PHONE_NUMBER}
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
