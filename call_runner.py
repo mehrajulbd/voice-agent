@@ -76,8 +76,8 @@ async def place_call(
         # Map language code to Google STT supported codes
         config_service = CallConfigService()
         effective_lang = language_code or config_service.get_config().language_code
-        if effective_lang == "bn-BD":
-            effective_lang = "bn-IN"  # Google STT only supports bn-IN for Bengali
+        # if effective_lang == "bn-BD":
+        #     effective_lang = "bn-IN"  # Google STT only supports bn-IN for Bengali
 
         # Generate TTS message
         if custom_tts:

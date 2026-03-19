@@ -171,7 +171,7 @@ def checkout_page():
         # Language selection (optional)
         language = st.selectbox(
             "Language (Optional)",
-            options=["bn-IN", "en-US"],
+            options=["bn-BD", "bn-IN"],
             index=0,
             help="Select language for automated call (bn-IN = Bengali, India"
         )

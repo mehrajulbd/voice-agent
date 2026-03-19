@@ -30,7 +30,7 @@ class TTSService:
         payload = {
             "input": {"text": text},
             "voice": {
-                "languageCode": "bn-IN",  # Use bn-BD if you want the Bangladesh voice, but it may be less natural
+                "languageCode": language_code,  # Use bn-BD if you want the Bangladesh voice, but it may be less natural
                 # "name": "bn-IN-Neural2-A",
                 "ssmlGender": "FEMALE",
             },
@@ -43,7 +43,7 @@ class TTSService:
         }
 
         url = f"{GOOGLE_TTS_URL}?key={self.api_key}"
-        print(f"[TTSService] Synthesizing with {voice_name}...")
+        print(f"[TTSService] Synthesizing with {language_code} and {voice_name}...")
         
         response = requests.post(url, json=payload)
 
