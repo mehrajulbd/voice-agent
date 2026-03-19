@@ -116,15 +116,18 @@ livekit-call/
 ├── test_call.py              # Minimal diagnostic test
 ├── check_call_status.py      # Event monitoring tool
 ├── config/
-│   └── settings.py          # Centralized configuration (env vars)
+│   ├── settings.py          # Centralized configuration (env vars)
+│   └── call_config.json     # Call parameters (company, product, quantity)
 ├── call/
 │   ├── make_call.py         # SIP call initiation
 │   ├── call_handler.py      # Legacy handler (transcribe only)
 │   └── livekit_client.py    # Room connection helper
 ├── services/
-│   ├── tts_service.py       # Google TTS integration
-│   ├── stt_service.py       # Google STT integration
+│   ├── tts_service.py       # Google TTS integration (supports multi-language)
+│   ├── stt_service.py       # Google STT integration (supports bn-IN)
+│   ├── gemini_service.py    # Gemini API for analysis (currently dummy)
 │   ├── json_store.py        # Result persistence
+│   ├── call_config_service.py # Loads call_config.json
 │   └── call_handler.py      # Main call orchestration
 ├── audio/
 │   └── audio_utils.py       # Audio streaming utilities
@@ -145,6 +148,17 @@ livekit-call/
 - STT maximum: ~55 seconds to stay within API limits
 - Base64 encode audio bytes before sending to API
 - Handle API errors gracefully and return fallback messages
+- Gemini API uses same GOOGLE_API_KEY, REST pattern with `requests`
+
+### Configuration Service Pattern
+When adding new config-driven features:
+1. Create `config/` directory for JSON/YAML configuration files
+2. Create a service class in `services/` that loads and validates the config
+3. Use Python `dataclass` for type-safe configuration objects
+4. Provide sensible defaults when config file is missing
+5. Generate dynamic content (like TTS messages) from config method
+
+Example: `CallConfigService` loads `call_config.json` and has `generate_tts_text()` method.
 
 ### Environment Variables
 All required in `.env`:

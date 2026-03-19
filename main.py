@@ -6,17 +6,29 @@ load_dotenv()
 
 from call.make_call import make_call
 from services.call_handler import CallHandler
+from services.call_config_service import CallConfigService
 
 
 async def main():
     phone_number = os.getenv("TARGET_PHONE_NUMBER", "+8801327403936")
 
-    tts_text = "Hello. This is an automated call from our system. Please say something after the tone, and we will record your response."
+    # Load call configuration
+    config_service = CallConfigService()
+    config = config_service.get_config()
+
+    # Generate TTS message based on configuration
+    tts_text = config_service.generate_tts_text()
 
     print("=" * 60)
     print("  LiveKit + Twilio SIP Automated Call System")
     print("=" * 60)
     print(f"  Target Phone : {phone_number}")
+    print(f"  Company      : {config.company_name}")
+    print(f"  Product      : {config.product_name}")
+    print(f"  Quantity     : {config.quantity}")
+    print(f"  Language     : {config.language_code}")
+    if config.voice_name:
+        print(f"  Voice        : {config.voice_name}")
     print(f"  TTS Message  : {tts_text}")
     print(f"  From Number  : {os.getenv('FROM_PHONE_NUMBER', 'NOT SET')}")
     print(f"  LiveKit URL  : {os.getenv('LIVEKIT_URL', 'NOT SET')}")
@@ -50,6 +62,8 @@ async def main():
         room_name=room_name,
         tts_text=tts_text,
         phone_number=phone_number,
+        language_code=config.language_code,
+        voice_name=config.voice_name
     )
     await handler.run()
 
