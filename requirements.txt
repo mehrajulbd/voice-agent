@@ -3,6 +3,7 @@ livekit-api>=0.7.0
 python-dotenv
 requests
 numpy
+streamlit
 
 google-generativeai
 google-cloud-speech

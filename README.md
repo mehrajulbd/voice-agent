@@ -2,6 +2,39 @@
 
 An automated telephone calling system that uses LiveKit's SIP integration with Twilio to place outbound calls, deliver a pre-recorded message using Google Text-to-Speech (TTS), and transcribe the recipient's response using Google Speech-to-Text (STT).
 
+## Quick Start
+
+### 1. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Configure Environment
+
+```bash
+cp .env.example .env
+# Edit .env with your actual credentials
+```
+
+Required environment variables:
+- `LIVEKIT_URL` - LiveKit server URL
+- `LIVEKIT_API_KEY` - LiveKit API key
+- `LIVEKIT_API_SECRET` - LiveKit API secret
+- `SIP_TRUNK_ID` - LiveKit SIP trunk ID (from Twilio)
+- `FROM_PHONE_NUMBER` - Your Twilio number (E.164 format)
+- `GOOGLE_API_KEY` - Google Cloud API key with TTS and STT enabled
+
+### 3. Run the Web UI (Recommended)
+
+```bash
+streamlit run ui/app.py
+```
+
+Open http://localhost:8501 in your browser and start ordering!
+
+---
+
 ## Architecture Overview
 
 ### System Flow
@@ -70,6 +103,16 @@ An automated telephone calling system that uses LiveKit's SIP integration with T
   - Exports constants: LIVEKIT_URL, LIVEKIT_API_KEY, etc.
   - NOTE: Some fields like `LIVEKIT_TRUNK_ID` have mismatch with actual usage (`SIP_TRUNK_ID`)
 
+- **`config/call_config.json`** - Legacy call configuration (optional)
+  - Contains default company_name, product_name, quantity, language_code, voice_name
+  - Used by `main.py` for backward compatibility
+  - New UI uses `products.json` instead
+
+- **`config/products.json`** - Product catalog for web UI
+  - Contains company_name and array of products
+  - Each product has: id, name, name_en, unit, default_quantity, price_per_unit, currency
+  - This is the source for the product selection UI
+
 #### Utilities
 
 - **`audio/audio_utils.py`** - Async audio streaming helper
@@ -78,6 +121,28 @@ An automated telephone calling system that uses LiveKit's SIP integration with T
 
 - **`call/livekit_client.py`** - Simple room connection helper
   - Basic `connect()` function for quick room joins
+
+#### New Features (2025)
+
+- **`services/product_service.py`** - Product catalog management
+  - Loads products from `config/products.json`
+  - Provides `Product` dataclass with name, price, unit
+  - Used by the web UI to display catalog
+
+- **`call_runner.py`** - High-level call orchestration
+  - `place_call()` function - single entry point for making calls
+  - Accepts product_id, quantity, phone, language parameters
+  - Returns structured results with transcription and confirmation status
+  - Used by both CLI and web UI
+
+- **`ui/app.py`** - Streamlit web interface
+  - Product catalog browser with 3-column responsive grid
+  - Checkout form with quantity and phone input
+  - Real-time call progress display with spinners
+  - Results page with transcription and analysis
+  - Session state management for multi-page flow
+
+---
 
 #### Diagnostic Tools
 
@@ -213,6 +278,25 @@ python main.py
 
 # Or change TARGET_PHONE_NUMBER in .env first
 ```
+
+### Web UI (Recommended)
+
+The system now includes a beautiful Streamlit web interface for ordering:
+
+```bash
+# Run the web UI
+streamlit run ui/app.py
+
+# Access at http://localhost:8501
+```
+
+The web UI provides:
+- **Product Catalog**: Browse available products with prices
+- **Checkout Form**: Select quantity and enter phone number
+- **Call Progress**: Real-time status updates during the call
+- **Results Page**: View transcription and confirmation status
+
+---
 
 ### Diagnostic Workflow
 

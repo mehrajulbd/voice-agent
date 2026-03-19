@@ -67,14 +67,50 @@ class CallConfigService:
         Returns a Bangla (or configured language) message.
         """
         config = self.config
-        
-        return (
-            f"আমি {config.company_name} থেকে মীম বলছি।"
-            f"আপনি {config.quantity} টি {config.product_name} অর্ডার করেছেন। "
-            "আমি অর্ডার নিশ্চিত করতে চাই। অনুগ্রহ করে হ্যাঁ বলুন যদি আপনি অর্ডারটি চান।"
+
+        return self._generate_tts_text_impl(
+            company_name=config.company_name,
+            product_name=config.product_name,
+            quantity=config.quantity,
+            language_code=config.language_code
         )
-        # return (
-        # f"Hello, I'm calling from {config.company_name}. "
-        # f"I want to confirm your order for {config.quantity} "
-        # f"{config.product_name}. Please say yes to confirm."
-        # )
+
+    def generate_tts_text_for_order(self, product_name: str, quantity: str, language_code: Optional[str] = None) -> str:
+        """
+        Generate a TTS message for a specific product and quantity.
+        Uses the company name from config and optional language override.
+
+        Args:
+            product_name: Name of the product
+            quantity: Quantity as string (e.g., "৫ কেজি" or "5 kg")
+            language_code: Optional language code override (defaults to config language)
+
+        Returns:
+            TTS message string in appropriate language
+        """
+        config = self.config
+        lang = language_code or config.language_code
+
+        return self._generate_tts_text_impl(
+            company_name=config.company_name,
+            product_name=product_name,
+            quantity=quantity,
+            language_code=lang
+        )
+
+    def _generate_tts_text_impl(self, company_name: str, product_name: str, quantity: str, language_code: str) -> str:
+        """Internal implementation for TTS text generation."""
+        if language_code.startswith("bn"):
+            # Bangla message
+            return (
+                f"আমি {company_name} থেকে বলছি।"
+                f"আপনি {quantity} টি {product_name} অর্ডার করেছেন। "
+                "আমি অর্ডার নিশ্চিত করতে চাই। অনুগ্রহ করে হ্যাঁ বলুন যদি আপনি অর্ডারটি চান।"
+            )
+        else:
+            # English fallback
+            return (
+                f"Hello, I'm calling from {company_name}. "
+                f"I want to confirm your order for {quantity} "
+                f"{product_name}. Please say yes to confirm."
+            )

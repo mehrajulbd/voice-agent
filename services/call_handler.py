@@ -4,6 +4,7 @@ import asyncio
 import struct
 import wave
 import io
+import datetime
 from typing import Optional
 from dotenv import load_dotenv
 
@@ -53,6 +54,17 @@ class CallHandler:
         self._record_duration = 15  # seconds to record customer response
         self._pcm_data: bytes = b""  # Pre-synthesized TTS PCM data
         self._customer_audio_stream = None
+        # Store call results for external retrieval
+        self._last_transcription: str = ""
+        self._last_confirmation_detected: bool = False
+        self._last_gemini_analysis: str = ""
+        self._last_result_file: str = ""
+        # Track sample rate (may be updated from actual track)
+        self._track_sample_rate = SAMPLE_RATE
+        # Debug: Save audio for troubleshooting if DEBUG_AUDIO=true
+        self._debug_audio = os.getenv("DEBUG_AUDIO", "false").lower() == "true"
+        if self._debug_audio:
+            print("[CallHandler] DEBUG_AUDIO enabled - will save recorded audio to WAV file")
 
     async def run(self):
         """Main entry point: pre-synth TTS, connect, play, record, transcribe, save."""
@@ -167,7 +179,7 @@ class CallHandler:
             print(f"[CallHandler] Recorded {len(self.recorded_audio)} bytes ({audio_duration:.1f}s) of audio")
             transcription = self.stt_service.transcribe(
                 bytes(self.recorded_audio),
-                sample_rate=SAMPLE_RATE,
+                sample_rate=self._track_sample_rate,
                 language_code=self.language_code
             )
         else:
@@ -215,6 +227,12 @@ class CallHandler:
         print(f"  Customer said: {transcription}")
         print(f"  Saved to: {result_file}")
         print(f"{'='*60}")
+
+        # Store results for external retrieval
+        self._last_transcription = transcription
+        self._last_confirmation_detected = confirmation_detected
+        self._last_gemini_analysis = gemini_analysis
+        self._last_result_file = result_file
 
         # Disconnect
         await self.room.disconnect()
@@ -306,6 +324,17 @@ class CallHandler:
         print(f"[CallHandler] Track subscribed: kind={track.kind} from {participant.identity} (sid={track.sid})")
         if track.kind == rtc.TrackKind.KIND_AUDIO and participant.identity.startswith("phone-"):
             print(f"[CallHandler] *** Customer audio track active — call is answered! ***")
+            # Log track parameters and store sample rate for STT
+            try:
+                sample_rate = getattr(track, 'sample_rate', None)
+                num_channels = getattr(track, 'num_channels', None)
+                if sample_rate:
+                    self._track_sample_rate = sample_rate
+                    print(f"[CallHandler] Track sample rate: {sample_rate} Hz, channels: {num_channels}")
+                else:
+                    print(f"[CallHandler] Track info: sample_rate=unknown, channels={num_channels}")
+            except Exception as e:
+                print(f"[CallHandler] Could not get track info: {e}")
             self._customer_audio_track_ready.set()
             audio_stream = rtc.AudioStream(track)
             asyncio.ensure_future(self._record_audio_stream(audio_stream))
@@ -334,6 +363,29 @@ class CallHandler:
                 break
 
         print(f"[CallHandler] Finished recording. Total bytes: {len(self.recorded_audio)}")
+
+        # Debug: Check if audio is all zeros (silence)
+        if self._debug_audio and len(self.recorded_audio) > 0:
+            all_zero = all(b == 0 for b in self.recorded_audio)
+            print(f"[CallHandler] DEBUG: Audio all zeros: {all_zero}")
+
+        # Save audio to WAV file if debug enabled
+        if self._debug_audio and len(self.recorded_audio) > 0:
+            try:
+                timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                # Sanitize phone number for filename
+                safe_phone = self.phone_number.replace("+", "").replace("#", "")
+                filename = f"debug_audio/call_{safe_phone}_{timestamp}.wav"
+                os.makedirs("debug_audio", exist_ok=True)
+                with wave.open(filename, 'wb') as wf:
+                    wf.setnchannels(NUM_CHANNELS)
+                    wf.setsampwidth(2)  # 16-bit = 2 bytes
+                    wf.setframerate(SAMPLE_RATE)
+                    wf.writeframes(self.recorded_audio)
+                print(f"[CallHandler] Saved debug audio to: {filename}")
+            except Exception as e:
+                print(f"[CallHandler] Failed to save debug audio: {e}")
+
         self._recording_done.set()
 
     async def _wait_for_sip_active(self, timeout: float = 30):

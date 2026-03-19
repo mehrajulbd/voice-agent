@@ -8,3 +8,7 @@ __pycache__/
 .vscode/
 
 call_2*
+
+debug_audio
+
+*.pem

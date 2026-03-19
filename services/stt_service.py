@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Using v1p1beta1 to access enhanced models like 'latest_long'
-GOOGLE_STT_URL = "https://speech.googleapis.com/v1p1beta1/speech:recognize"
+GOOGLE_STT_URL = "https://speech.googleapis.com/v1/speech:recognize"
 
 class STTService:
     """Google Cloud Speech-to-Text using REST API with Enhanced Bangla Models."""
@@ -45,10 +45,8 @@ class STTService:
             "config": {
                 "encoding": "LINEAR16",
                 "sampleRateHertz": sample_rate,
-                "languageCode": language_code,
+                "languageCode": language_code,  # Use "bn-BD" if targeting Bangladeshi speakers
                 "enableAutomaticPunctuation": True,
-                # --- KEY IMPROVEMENTS FOR BANGLA ACCURACY ---
-                "model": "latest_long",     # Uses the most recent training data
                 "useEnhanced": True,        # Opts into higher-quality hardware processing
                 # --------------------------------------------
             },
@@ -57,10 +55,15 @@ class STTService:
             },
         }
 
+        print(f"[STTService] Sending audio for transcription (size: {len(audio_bytes)} bytes)")
+        print(f"[STTService] Payload config: {payload['config']}")
+
         url = f"{GOOGLE_STT_URL}?key={self.api_key}"
         
         try:
             response = requests.post(url, json=payload, timeout=30)
+            if response.status_code != 200:
+                print(f"[STTService] API Error Response: {response.text}")
             response.raise_for_status() # Raise error for 4xx or 5xx
         except requests.exceptions.Timeout:
             return "(transcription timed out)"
@@ -95,3 +98,4 @@ class STTService:
 #     # with open("audio.raw", "rb") as f:
 #     #     text = service.transcribe(f.read())
 #     #     print(text)
+

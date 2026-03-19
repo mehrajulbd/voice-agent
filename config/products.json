@@ -1,0 +1,68 @@
+{
+  "company_name": "চালডাল ডট কম",
+  "products": [
+    {
+      "id": "premium_rice",
+      "name": "প্রিমিয়াম চাল",
+      "name_en": "Premium Rice",
+      "unit": "কেজি",
+      "default_quantity": 1,
+      "price_per_unit": 120.50,
+      "currency": "BDT"
+    },
+    {
+      "id": "arhar_dal",
+      "name": "আরহার ডাল",
+      "name_en": "Arhar Dal",
+      "unit": "কেজি",
+      "default_quantity": 1,
+      "price_per_unit": 180.00,
+      "currency": "BDT"
+    },
+    {
+      "id": "moog_dal",
+      "name": "মুগ ডাল",
+      "name_en": "Moog Dal",
+      "unit": "কেজি",
+      "default_quantity": 1,
+      "price_per_unit": 160.00,
+      "currency": "BDT"
+    },
+    {
+      "id": "masoor_dal",
+      "name": "মসূর ডাল",
+      "name_en": "Masoor Dal",
+      "unit": "কেজি",
+      "default_quantity": 1,
+      "price_per_unit": 140.00,
+      "currency": "BDT"
+    },
+    {
+      "id": "cholar_dal",
+      "name": "চোলার ডাল",
+      "name_en": "Chola Dal",
+      "unit": "কেজি",
+      "default_quantity": 1,
+      "price_per_unit": 110.00,
+      "currency": "BDT"
+    },
+    {
+      "id": "mustard_oil",
+      "name": "খাঁটি সরিষার তেল",
+      "name_en": "Pure Mustard Oil",
+      "unit": "লিটার",
+      "default_quantity": 1,
+      "price_per_unit": 180.00,
+      "currency": "BDT"
+    },
+    {
+      "id": "pure_ghee",
+      "name": "গাওয়া ঘি",
+      "name_en": "Pure Ghee",
+      "unit": "গ্রাম",
+      "default_quantity": 1,
+      "price_per_unit": 1.10,
+      "currency": "BDT"
+    }
+  ]
+}
